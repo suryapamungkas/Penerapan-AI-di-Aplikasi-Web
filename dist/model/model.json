@@ -1,0 +1,64 @@
+{
+  "format": "layers-model",
+  "generatedBy": "TensorFlow.js v4.22.0",
+  "convertedBy": null,
+  "modelTopology": {
+    "class_name": "Sequential",
+    "config": {
+      "name": "vegetable_classifier",
+      "layers": [
+        {
+          "class_name": "Conv2D",
+          "config": {
+            "batch_input_shape": [null, 224, 224, 3],
+            "dtype": "float32",
+            "name": "conv2d",
+            "trainable": true,
+            "filters": 8,
+            "kernel_size": [3, 3],
+            "strides": [1, 1],
+            "padding": "valid",
+            "data_format": "channels_last",
+            "dilation_rate": [1, 1],
+            "activation": "relu",
+            "use_bias": true,
+            "kernel_initializer": {"class_name": "GlorotUniform", "config": {"seed": null}},
+            "bias_initializer": {"class_name": "Zeros", "config": {}}
+          }
+        },
+        {
+          "class_name": "GlobalAveragePooling2D",
+          "config": {
+            "name": "global_average_pooling2d",
+            "dtype": "float32",
+            "data_format": "channels_last"
+          }
+        },
+        {
+          "class_name": "Dense",
+          "config": {
+            "name": "dense",
+            "trainable": true,
+            "dtype": "float32",
+            "units": 6,
+            "activation": "softmax",
+            "use_bias": true,
+            "kernel_initializer": {"class_name": "GlorotUniform", "config": {"seed": null}},
+            "bias_initializer": {"class_name": "Zeros", "config": {}}
+          }
+        }
+      ]
+    }
+  },
+  "weightsManifest": [
+    {
+      "paths": ["group1-shard1of1.bin"],
+      "weights": [
+        {"name": "conv2d/kernel", "shape": [3, 3, 3, 8], "dtype": "float32"},
+        {"name": "conv2d/bias", "shape": [8], "dtype": "float32"},
+        {"name": "dense/kernel", "shape": [8, 6], "dtype": "float32"},
+        {"name": "dense/bias", "shape": [6], "dtype": "float32"}
+      ]
+    }
+  ]
+}

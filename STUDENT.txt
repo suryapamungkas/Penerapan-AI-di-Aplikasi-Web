@@ -1,0 +1,5 @@
+Nama: [Nama Mahasiswa]
+NIM: [NIM]
+Kelas: [Kelas]
+
+URL Deployment Netlify: [URL akan diisi setelah deployment]
