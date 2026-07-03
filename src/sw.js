@@ -3,99 +3,90 @@
  * Handles precaching of app shell and model files,
  * plus runtime caching for CDN resources and AI model downloads.
  */
-import { precacheAndRoute } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
+import { precacheAndRoute, createHandlerBoundToURL } from 'workbox-precaching';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
 import { CacheFirst, StaleWhileRevalidate } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
 // ========================================
 // 1. Precache App Shell & Model Files
 // ========================================
-// self.__WB_MANIFEST is replaced by Workbox with the precache manifest
-// This includes: HTML, CSS, JS bundles, model.json, weights.bin, metadata.json, icons
 precacheAndRoute(self.__WB_MANIFEST);
 
 // ========================================
-// 2. Runtime Cache: CDN Resources (TF.js, Fonts, etc.)
+// 2. Navigation fallback for offline (SPA)
+// ========================================
+try {
+  const handler = createHandlerBoundToURL('/index.html');
+  const navigationRoute = new NavigationRoute(handler, {
+    denylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
+  });
+  registerRoute(navigationRoute);
+} catch (e) {
+  console.warn('Navigation fallback error:', e);
+}
+
+// ========================================
+// 3. Runtime Cache: CDN Resources (TF.js, Transformers.js)
 // ========================================
 registerRoute(
   ({ url }) => url.origin === 'https://cdn.jsdelivr.net',
   new CacheFirst({
     cacheName: 'cdn-resources',
     plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-      }),
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     ],
   })
 );
 
 // ========================================
-// 3. Runtime Cache: Google Fonts
+// 4. Runtime Cache: Google Fonts
 // ========================================
 registerRoute(
-  ({ url }) =>
-    url.origin === 'https://fonts.googleapis.com' ||
-    url.origin === 'https://fonts.gstatic.com',
+  ({ url }) => url.origin === 'https://fonts.googleapis.com' || url.origin === 'https://fonts.gstatic.com',
   new StaleWhileRevalidate({
     cacheName: 'google-fonts',
     plugins: [
-      new ExpirationPlugin({
-        maxEntries: 20,
-        maxAgeSeconds: 365 * 24 * 60 * 60, // 1 year
-      }),
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 20, maxAgeSeconds: 365 * 24 * 60 * 60 }),
     ],
   })
 );
 
 // ========================================
-// 4. Runtime Cache: Hugging Face AI Model Files
+// 5. Runtime Cache: Hugging Face AI Models
 // ========================================
 registerRoute(
-  ({ url }) =>
-    url.hostname.includes('huggingface.co') ||
-    url.hostname.includes('hf.co') ||
-    url.hostname.includes('cdn-lfs'),
+  ({ url }) => url.hostname.includes('huggingface.co') || url.hostname.includes('hf.co') || url.hostname.includes('cdn-lfs'),
   new CacheFirst({
     cacheName: 'hf-ai-models',
     plugins: [
-      new ExpirationPlugin({
-        maxEntries: 100,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-      }),
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     ],
   })
 );
 
 // ========================================
-// 5. Runtime Cache: TensorFlow Hub Model Files
+// 6. Runtime Cache: TensorFlow Hub
 // ========================================
 registerRoute(
-  ({ url }) =>
-    url.hostname.includes('tfhub.dev') ||
-    url.hostname.includes('kaggle.com') ||
-    url.hostname.includes('storage.googleapis.com'),
+  ({ url }) => url.hostname.includes('tfhub.dev') || url.hostname.includes('kaggle.com') || url.hostname.includes('storage.googleapis.com'),
   new CacheFirst({
     cacheName: 'tf-models',
     plugins: [
-      new ExpirationPlugin({
-        maxEntries: 50,
-        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 days
-      }),
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      new ExpirationPlugin({ maxEntries: 50, maxAgeSeconds: 30 * 24 * 60 * 60 }),
     ],
   })
 );
 
 // ========================================
-// 6. Activate immediately & claim clients
+// 7. Activate immediately & claim clients
 // ========================================
-self.addEventListener('install', (event) => {
-  self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
+self.addEventListener('install', (event) => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
 console.log('[SW] Root Fact App Service Worker loaded');

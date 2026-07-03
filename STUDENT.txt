@@ -1,5 +1,5 @@
-Nama: [Nama Mahasiswa]
-NIM: [NIM]
-Kelas: [Kelas]
+Nama: [Nur Hidayat Surya Pamungkas]
+NIM: [23081010102]
+Kelas: [Belajar Penerapan AI di Aplikasi Web]
 
-URL Deployment Netlify: [URL akan diisi setelah deployment]
+URL Deployment Netlify: [https://penerapan-ai-di-aplikasi-web.netlify.app/]

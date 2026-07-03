@@ -4,11 +4,11 @@
  */
 import { getTransformersDevice } from '../utils/backendHelper.js';
 
-// Persona prompt templates (in English for better model performance)
+// Persona prompt templates (enforcing English and single sentence to prevent cutoff)
 const PERSONA_PROMPTS = {
-  funny: 'You are a hilarious comedian who loves vegetables. Tell a short, funny, and entertaining fun fact about {vegetable}. Be witty and humorous. Keep it concise.',
-  history: 'You are a knowledgeable historian. Tell a short, fascinating historical fun fact about {vegetable}. Focus on its origins, historical uses, or cultural significance. Keep it concise.',
-  science: 'You are a brilliant scientist. Tell a short, mind-blowing scientific fun fact about {vegetable}. Focus on nutrition, biology, chemistry, or interesting scientific properties. Keep it concise.',
+  funny: 'You are a hilarious comedian. Write EXACTLY ONE short, funny English sentence containing a fun fact about {vegetable}. MUST be in English only. Do not cut off.',
+  history: 'You are a historian. Write EXACTLY ONE short English sentence containing a historical fun fact about {vegetable}. MUST be in English only. Do not cut off.',
+  science: 'You are a scientist. Write EXACTLY ONE short English sentence containing a scientific fun fact about {vegetable}. MUST be in English only. Do not cut off.',
 };
 
 export class GenerativeModel {
@@ -97,11 +97,11 @@ export class GenerativeModel {
     try {
       const result = await this._generator(
         [
-          { role: 'system', content: 'You are a helpful assistant that shares fun facts about vegetables. Respond in 1-3 sentences.' },
+          { role: 'system', content: 'You are an English-speaking assistant. You must reply in exactly one complete English sentence. Do not use any Indonesian words.' },
           { role: 'user', content: userPrompt },
         ],
         {
-          max_new_tokens: 150,
+          max_new_tokens: 250,
           temperature: 0.7,
           top_p: 0.9,
           do_sample: true,
