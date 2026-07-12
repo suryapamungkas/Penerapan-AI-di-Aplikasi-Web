@@ -91,15 +91,26 @@ export class DetectionPresenter {
       // Run prediction (uses tf.tidy internally)
       const result = this._model.predict(video);
 
+      // Map Indonesian label to English for consistency across UI and AI
+      const LABEL_MAP = {
+        'Brokoli': 'Broccoli',
+        'Wortel': 'Carrot',
+        'Tomat': 'Tomato',
+        'Kentang': 'Potato',
+        'Kubis': 'Cabbage',
+        'Bawang': 'Onion'
+      };
+      const englishLabel = result.label ? (LABEL_MAP[result.label] || result.label) : null;
+
       // Update view
-      if (result.label && result.confidence > 0.1) {
-        this._view.updateResult(result.label, result.confidence);
+      if (englishLabel && result.confidence > 0.1) {
+        this._view.updateResult(englishLabel, result.confidence);
       } else {
         this._view.clearResult();
       }
 
       // Notify callbacks
-      this._detectionCallbacks.forEach((cb) => cb(result.label, result.confidence));
+      this._detectionCallbacks.forEach((cb) => cb(englishLabel, result.confidence));
 
       // Update FPS counter
       this._frameCount++;

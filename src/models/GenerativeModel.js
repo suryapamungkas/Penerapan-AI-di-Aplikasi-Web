@@ -4,12 +4,6 @@
  */
 import { getTransformersDevice } from '../utils/backendHelper.js';
 
-// Persona prompt templates (enforcing English and single sentence to prevent cutoff)
-const PERSONA_PROMPTS = {
-  funny: 'You are a hilarious comedian. Write EXACTLY ONE short, funny English sentence containing a fun fact about {vegetable}. MUST be in English only. Do not cut off.',
-  history: 'You are a historian. Write EXACTLY ONE short English sentence containing a historical fun fact about {vegetable}. MUST be in English only. Do not cut off.',
-  science: 'You are a scientist. Write EXACTLY ONE short English sentence containing a scientific fun fact about {vegetable}. MUST be in English only. Do not cut off.',
-};
 
 export class GenerativeModel {
   constructor() {
@@ -81,7 +75,7 @@ export class GenerativeModel {
 
   /**
    * Generate a fun fact about a vegetable
-   * @param {string} vegetableName - Name of the vegetable
+   * @param {string} vegetableName - Name of the vegetable (in English)
    * @param {string} persona - Persona key ('funny', 'history', 'science')
    * @returns {Promise<string>} Generated fun fact text
    */
@@ -91,17 +85,17 @@ export class GenerativeModel {
       await this.load();
     }
 
-    const systemPrompt = PERSONA_PROMPTS[persona] || PERSONA_PROMPTS.funny;
-    const userPrompt = systemPrompt.replace('{vegetable}', vegetableName);
+    // Exact prompt format recommended by Dicoding reviewer
+    const userPrompt = `Describe ${vegetableName} in a ${persona} way with one sentence.`;
 
     try {
       const result = await this._generator(
         [
-          { role: 'system', content: 'You are an English-speaking assistant. You must reply in exactly one complete English sentence. Do not use any Indonesian words.' },
+          { role: 'system', content: 'You are an AI assistant that shares interesting fun facts and health benefits about vegetables in one clear English sentence.' },
           { role: 'user', content: userPrompt },
         ],
         {
-          max_new_tokens: 250,
+          max_new_tokens: 150,
           temperature: 0.7,
           top_p: 0.9,
           do_sample: true,
@@ -113,7 +107,7 @@ export class GenerativeModel {
       const lastMessage = generated[generated.length - 1];
       const text = lastMessage.content.trim();
 
-      console.log(`[GenerativeModel] Generated fun fact for ${vegetableName} (${persona})`);
+      console.log(`[GenerativeModel] Generated fun fact for ${vegetableName} (${persona}):`, text);
       return text;
     } catch (error) {
       console.error('[GenerativeModel] Generation failed:', error);
