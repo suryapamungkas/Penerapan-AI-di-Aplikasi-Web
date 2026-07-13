@@ -116,14 +116,20 @@ async function main() {
 
   // === 11. Register Service Worker ===
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
+    const registerSW = async () => {
       try {
         const registration = await navigator.serviceWorker.register('./sw.js');
         console.log('[SW] Service Worker registered:', registration.scope);
       } catch (err) {
         console.log('[SW] Service Worker registration failed (expected in dev mode):', err.message);
       }
-    });
+    };
+
+    if (document.readyState === 'complete') {
+      registerSW();
+    } else {
+      window.addEventListener('load', registerSW);
+    }
   }
 }
 
