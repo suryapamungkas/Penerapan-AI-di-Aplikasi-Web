@@ -12,7 +12,7 @@ module.exports = (env, argv) => {
       path: path.resolve(__dirname, 'dist'),
       filename: isProduction ? 'js/bundle.[contenthash:8].js' : 'js/bundle.js',
       clean: true,
-      publicPath: '/',
+      publicPath: '',
     },
     module: {
       rules: [

@@ -28,7 +28,7 @@ export class DetectionModel {
    * @param {string} metadataUrl - URL to metadata.json
    * @param {Function} [onProgress] - Progress callback (0.0 to 1.0)
    */
-  async load(modelUrl = '/model/model.json', metadataUrl = '/model/metadata.json', onProgress = null) {
+  async load(modelUrl = 'model/model.json', metadataUrl = 'model/metadata.json', onProgress = null) {
     try {
       // Load metadata first
       if (onProgress) onProgress(0.1);

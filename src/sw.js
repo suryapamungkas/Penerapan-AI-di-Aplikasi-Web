@@ -12,13 +12,18 @@ import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 // ========================================
 // 1. Precache App Shell & Model Files
 // ========================================
-precacheAndRoute(self.__WB_MANIFEST);
+const manifest = self.__WB_MANIFEST || [];
+precacheAndRoute(manifest);
 
 // ========================================
 // 2. Navigation fallback for offline (SPA)
 // ========================================
 try {
-  const handler = createHandlerBoundToURL('/index.html');
+  // Dynamically find index.html in precache list (handles absolute/relative paths)
+  const indexEntry = manifest.find(entry => entry.url && entry.url.endsWith('index.html'));
+  const indexUrl = indexEntry ? indexEntry.url : 'index.html';
+
+  const handler = createHandlerBoundToURL(indexUrl);
   const navigationRoute = new NavigationRoute(handler, {
     denylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
   });

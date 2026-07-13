@@ -33,7 +33,7 @@ export class DetectionPresenter {
    * @param {Function} [onProgress] - Progress callback (0-1)
    */
   async init(onProgress = null) {
-    await this._model.load('/model/model.json', '/model/metadata.json', onProgress);
+    await this._model.load('model/model.json', 'model/metadata.json', onProgress);
   }
 
   /**
