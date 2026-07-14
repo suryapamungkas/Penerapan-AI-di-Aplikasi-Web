@@ -48,8 +48,8 @@ export class GenerativeModel {
 
       // Load text generation pipeline with quantized model
       this._generator = await pipeline(
-        'text-generation',
-        'onnx-community/Qwen2.5-0.5B-Instruct',
+        'text2text-generation',
+        'Xenova/LaMini-Flan-T5-77M',
         {
           dtype: 'q4',
           device: device,
@@ -69,7 +69,7 @@ export class GenerativeModel {
     } catch (error) {
       this._isLoading = false;
       console.error('[GenerativeModel] Failed to load model:', error);
-      throw error;
+      throw new Error('Gagal mengunduh model AI karena masalah jaringan atau server. Pastikan koneksi stabil dan coba lagi.');
     }
   }
 
@@ -89,11 +89,11 @@ export class GenerativeModel {
     const userPrompt = `Describe ${vegetableName} in a ${persona} way with one sentence.`;
 
     try {
+      // Create a combined string prompt for text2text-generation
+      const promptText = `You are an AI assistant that shares interesting fun facts and health benefits about vegetables in one clear English sentence. ${userPrompt}`;
+      
       const result = await this._generator(
-        [
-          { role: 'system', content: 'You are an AI assistant that shares interesting fun facts and health benefits about vegetables in one clear English sentence.' },
-          { role: 'user', content: userPrompt },
-        ],
+        promptText,
         {
           max_new_tokens: 150,
           temperature: 0.7,
@@ -102,16 +102,14 @@ export class GenerativeModel {
         }
       );
 
-      // Extract the generated text from the last message
-      const generated = result[0].generated_text;
-      const lastMessage = generated[generated.length - 1];
-      const text = lastMessage.content.trim();
+      // text2text-generation returns [{ generated_text: "..." }]
+      const text = result[0].generated_text.trim();
 
       console.log(`[GenerativeModel] Generated fun fact for ${vegetableName} (${persona}):`, text);
       return text;
     } catch (error) {
       console.error('[GenerativeModel] Generation failed:', error);
-      throw error;
+      throw new Error('Terjadi kesalahan saat menghasilkan Fun Fact. Silakan coba lagi nanti.');
     }
   }
 
